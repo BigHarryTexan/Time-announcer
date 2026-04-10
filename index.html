@@ -1,1 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewoprt" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+	
+	<title>Time Announcer</title>
+	
+	<!-- PWA -->
+	manifest.json
+	<meta name="theme-color" content="#000000">
+	
+	<!-- iOS -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-title" content="Time Announcer">
+	
+	<style>
+		html, body {
+			margin: 0;
+			height: 100%;
+			background: black;
+			color: white;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+		}
+		h1 {
+			font-size: 2.2rem;
+		}
+		p {
+			opacity: 0.7;
+		}
+	</style>
+</head>
 
+<body>
+
+	<div>
+		<h1>Tap to Hear the Time</h1>
+		<p>Anywhere on the screen!</p>
+	</div>
+	
+	<script>
+		function speakTime() {
+			speechSynthesis.cancel();
+			
+			const now = new Date();
+			const time = new Intl.Date.Format('en-us',{
+				hour: 'numeric',
+				minute: '2-digit'
+		}).format(now);
+			
+		const utterance = new SpeechSynthesisUtterance('The time is ${time}');
+		utterance.rate = 0.95
+		
+		const voices = speechSynthesis.getVoices();
+		const voice = voices.find(v => v.lang.startsWith('en'));
+		if (voice) utterance.voice = voice;
+		
+		speech.Synthesis.speak(utterance);
+	}
+	
+	document.body.addEventListener('touchend', speakTime);
+	
+	document.body.addEventListener('click', speakTime);
+	
+		if ('serviceWorker in navigator) {	
+			navigator.serviceWorker.register('service-worker.js');
+		}
+	</script>
+</body>
+</html>
