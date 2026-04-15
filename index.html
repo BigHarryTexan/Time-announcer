@@ -67,9 +67,12 @@
 
   <label for="dimmer">Screen Brightness</label>
   <input type="range" id="dimmer" min="10" max="100" value="100">
-  </div>
+</div>
 
 <script>
+// ----------------------
+// Clock
+// ----------------------
 function updateClock() {
   const now = new Date();
   const time = now.toLocaleTimeString("en-GB", {
@@ -84,28 +87,35 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // ----------------------
-// Voice Selector
+// Voice Loader (iOS Fix)
 // ----------------------
 let availableVoices = [];
 
-function loadVoices() {
-  availableVoices = speechSynthesis.getVoices();
+function loadVoicesWithRetry() {
+  const voices = speechSynthesis.getVoices();
 
-  const select = document.getElementById("voiceSelect");
-  select.innerHTML = "";
+  if (voices.length > 0) {
+    availableVoices = voices;
 
-  availableVoices.forEach((v, i) => {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${v.name} (${v.lang})`;
-    select.appendChild(option);
-  });
+    const select = document.getElementById("voiceSelect");
+    select.innerHTML = "";
 
-  const aussie = availableVoices.findIndex(v => v.lang === "en-AU");
-  if (aussie >= 0) select.value = aussie;
+    voices.forEach((v, i) => {
+      const option = document.createElement("option");
+      option.value = i;
+      option.textContent = `${v.name} (${v.lang})`;
+      select.appendChild(option);
+    });
+
+    const aussie = voices.findIndex(v => v.lang === "en-AU");
+    if (aussie >= 0) select.value = aussie;
+
+  } else {
+    setTimeout(loadVoicesWithRetry, 200);
+  }
 }
 
-speechSynthesis.onvoiceschanged = loadVoices;
+loadVoicesWithRetry();
 
 // ----------------------
 // Speak Time
@@ -131,6 +141,12 @@ function speakTime() {
   speechSynthesis.speak(utterance);
 }
 
+// Prevent dropdown taps from triggering announcements
+document.getElementById("voiceSelect").addEventListener("click", e => {
+  e.stopPropagation();
+});
+
+// Body tap triggers announcement
 document.body.addEventListener("click", speakTime);
 document.body.addEventListener("touchend", speakTime);
 
@@ -139,7 +155,7 @@ document.body.addEventListener("touchend", speakTime);
 // ----------------------
 document.getElementById("dimmer").addEventListener("input", e => {
   const value = e.target.value;
-  document.body.style.background = `rgba(0,0,0,${value/100})`;
+  document.body.style.opacity = value / 100;
 });
 
 // ----------------------
@@ -152,4 +168,3 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
-
