@@ -6,11 +6,9 @@
 
 <title>Time Announcer</title>
 
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 
-<!-- iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Time Announcer">
@@ -23,55 +21,49 @@
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     text-align: center;
+    transition: background 0.3s;
   }
-  h1 {
-    font-size: 2.2rem;
-    margin-bottom: 0.5rem;
+
+  #clock {
+    font-size: 8rem;
+    font-weight: 600;
+    letter-spacing: 0.1rem;
+    margin-bottom: 1rem;
   }
-  p {
+
+  #controls {
+    position: fixed;
+    bottom: 20px;
+    width: 90%;
+    max-width: 500px;
+    opacity: 0.8;
+  }
+
+  label {
+    font-size: 0.9rem;
     opacity: 0.7;
+  }
+
+  select, input[type="range"] {
+    width: 100%;
+    margin-top: 6px;
+    margin-bottom: 16px;
   }
 </style>
 </head>
 
 <body>
 
-<div>
-  <h1>Tap to Hear the Time</h1>
-  <p>Anywhere on the screen</p>
-</div>
+<div id="clock">00:00</div>
+<p>Tap anywhere to hear the time</p>
 
-<script>
-function speakTime() {
-  speechSynthesis.cancel();
+<div id="controls">
+  <label for="voiceSelect">Voice</label>
+  <select id="voiceSelect"></select>
 
-  const now = new Date();
-  const time = now.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  });
-
-  const utterance = new SpeechSynthesisUtterance(`The time is ${time}`);
-  utterance.rate = 0.95;
-
-  const voices = speechSynthesis.getVoices();
-  const voice = voices.find(v => v.lang.startsWith("en"));
-  if (voice) utterance.voice = voice;
-
-  speechSynthesis.speak(utterance);
-}
-
-document.body.addEventListener("click", speakTime);
-document.body.addEventListener("touchend", speakTime);
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
-
-</body>
-</html>
+  <label for="dimmer">Screen Brightness</label>
+  <input type="range" id="dimmer" min="10" max="100" value="100">
