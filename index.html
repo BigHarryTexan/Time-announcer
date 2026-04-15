@@ -67,4 +67,89 @@
 
   <label for="dimmer">Screen Brightness</label>
   <input type="range" id="dimmer" min="10" max="100" value="100">
-  
+  </div>
+
+<script>
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+  document.getElementById("clock").textContent = time;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+// ----------------------
+// Voice Selector
+// ----------------------
+let availableVoices = [];
+
+function loadVoices() {
+  availableVoices = speechSynthesis.getVoices();
+
+  const select = document.getElementById("voiceSelect");
+  select.innerHTML = "";
+
+  availableVoices.forEach((v, i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `${v.name} (${v.lang})`;
+    select.appendChild(option);
+  });
+
+  const aussie = availableVoices.findIndex(v => v.lang === "en-AU");
+  if (aussie >= 0) select.value = aussie;
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
+
+// ----------------------
+// Speak Time
+// ----------------------
+function speakTime() {
+  speechSynthesis.cancel();
+
+  const now = new Date();
+  const time = now.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+
+  const utterance = new SpeechSynthesisUtterance(`The time is ${time}`);
+  utterance.rate = 0.95;
+
+  const selected = document.getElementById("voiceSelect").value;
+  if (availableVoices[selected]) {
+    utterance.voice = availableVoices[selected];
+  }
+
+  speechSynthesis.speak(utterance);
+}
+
+document.body.addEventListener("click", speakTime);
+document.body.addEventListener("touchend", speakTime);
+
+// ----------------------
+// Night Mode Dimmer
+// ----------------------
+document.getElementById("dimmer").addEventListener("input", e => {
+  const value = e.target.value;
+  document.body.style.background = `rgba(0,0,0,${value/100})`;
+});
+
+// ----------------------
+// Service Worker
+// ----------------------
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+</body>
+</html>
+
